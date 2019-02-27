@@ -167,10 +167,28 @@ $ python --version
 
 ## 네트워크 시작
 
-##### Hyperledger Fabric 1.2 ,third-party image, binary file다운로드
+**Hyperledger Fabric 1.2 ,third-party image, binary file다운로드**
 
 ```sh
 $ ./bootstrap.sh
+```
+
+**cryptogen 명령어로 인증서 및 키 생성**
+
+```sh
+$ ./cryptogen.sh
+```
+
+**configtxgen 명령어로 channel,  genesis block, anchorpeer설정파일 생성**
+
+```sh
+$ ./configtxgen.sh
+```
+
+**ca1,ca2의 환경변수에 Private Key 삽입**
+
+```sh
+$ ./replacekey.sh
 ```
 
 
