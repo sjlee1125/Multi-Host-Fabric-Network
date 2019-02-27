@@ -150,7 +150,7 @@ dockerInstall() {
   fi
 }
 
-DOCKER=false
+DOCKER=true
 SAMPLES=false
 BINARIES=true
 
