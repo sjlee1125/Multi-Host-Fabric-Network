@@ -167,6 +167,14 @@ $ python --version
 
 ## 네트워크 시작
 
+**git repogitory clone**
+
+```sh
+$ cd go
+$ git clone https://github.com/sjlee1125/Multi-Host-Fabric-Network.git
+$ cd Multi-Host-Fabric-Network
+```
+
 **Hyperledger Fabric 1.2 ,third-party image, binary file다운로드**
 
 ```sh
