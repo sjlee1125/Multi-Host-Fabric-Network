@@ -32,7 +32,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc3
+                    - node.hostname == NAMEOFHOST
                     
   kafka2:
     image: hyperledger/fabric-kafka
@@ -64,7 +64,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc3
+                    - node.hostname == NAMEOFHOST
 
   orderer2-example-com:
     container_name: orderer2.example.com
@@ -98,7 +98,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc3
+                    - node.hostname == NAMEOFHOST
     ports:
       - 9050:7050
       - 8065:6065

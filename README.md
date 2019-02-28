@@ -5,15 +5,15 @@ Hyperledger Fabric Multi Network Using Docker Swarm, Docker Stack
 
 ## Network Topology
 
-* pc1 :  zookeeper1, kafka0, orderer0, 
+* PC1 :  zookeeper1, kafka0, orderer0, 
 
-* pc2 :  zookeeper2, kafka1, orderer1, 
+* PC2 :  zookeeper2, kafka1, orderer1, 
 
-* pc3 :  zookeeper3, kafka2, orderer2, 
+* PC3 :  zookeeper3, kafka2, orderer2, 
 
-* pc4 :  kafka3, ca1(org1), peer0-org1, peer1-org1, couchdb0, couchdb1, org1cli
+* PC4 :  kafka3, ca1(org1), peer0-org1, peer1-org1, couchdb0, couchdb1, org1cli
 
-* pc5 :  ca2(org2), peer0-org2, peer1-org2, couchdb2, couchdb3, org2cli
+* PC5 :  ca2(org2), peer0-org2, peer1-org2, couchdb2, couchdb3, org2cli
 
 
 
@@ -31,6 +31,7 @@ Hyperledger Fabric Multi Network Using Docker Swarm, Docker Stack
 * 이상 https://hyperledger-fabric.readthedocs.io/en/latest/prereqs.html 참조
 
 * 5대 모두 사전필요사항 설치
+* docker port개방
 
 
 
@@ -87,17 +88,17 @@ Docker 설치
 $ sudo apt-get update && sudo apt-get install docker-ce
 ```
 
-아래의 명령어를 사용하여 docker에 계정추가후 도커재시작
+아래의 명령어를 사용하여 docker에 계정추가후 재시작
 
 ```sh
 $ sudo usermod -aG docker $USER
-$ sudo service docker restart
+$ sudo reboot
 ```
 
 아래의 명령어를 사용하여 설치확인
 
 ```sh
-$ docker -v
+$ docker ps
 ```
 
 
@@ -165,41 +166,174 @@ $ python --version
 
 
 
-## 네트워크 시작
+## 네트워크 시작준비
 
-**git repogitory clone**
+**PC1**
 
-```sh
-$ cd go
-$ git clone https://github.com/sjlee1125/Multi-Host-Fabric-Network.git
-$ cd Multi-Host-Fabric-Network
-```
+* git repogitory clone
 
-**Hyperledger Fabric 1.2 ,third-party image, binary file다운로드**
+  ```sh
+  $ mkdir go
+  $ cd go
+  $ git clone https://github.com/sjlee1125/Multi-Host-Fabric-Network.git
+  $ cd Multi-Host-Fabric-Network
+  ```
 
-```sh
-$ ./bootstrap.sh
-```
+* Hyperledger Fabric 1.2 ,third-party image, binary file다운로드
 
-**cryptogen 명령어로 인증서 및 키 생성**
+  ```sh
+  $ ./bootstrap.sh
+  ```
 
-```sh
-$ ./cryptogen.sh
-```
+* cryptogen 명령어로 인증서 및 키 생성
 
-**configtxgen 명령어로 channel,  genesis block, anchorpeer설정파일 생성**
+  ```sh
+  $ ./cryptogen.sh
+  ```
 
-```sh
-$ ./configtxgen.sh
-```
+* configtxgen 명령어로 channel,  genesis block, anchorpeer설정파일 생성
 
-**ca1,ca2의 환경변수에 Private Key 삽입**
+  ```sh
+  $ ./configtxgen.sh
+  ```
 
-```sh
-$ ./replacekey.sh
-```
+* ca1,ca2의 환경변수에 Private Key 삽입
 
+  ```sh
+  $ ./replacekey.sh
+  ```
 
+---
 
+**PC2, PC3, PC4, PC5**
 
+* git repository clone
 
+  ```sh
+  $ mkdir go
+  $ cd go
+  $ git clone https://github.com/sjlee1125/Multi-Host-Fabric-Network.git
+  $ cd Multi-Host-Fabric-Network
+  ```
+
+* Hyperledger Fabric 1.2 ,third-party image, binary file다운로드
+
+  ```sh
+  $ ./bootstrap.sh
+  ```
+
+* ssh로 전송하기 위해 /etc/ssh/sshd_config 파일의 PasswordAuthentication 부분 수정
+
+  ```sh
+  $ sudo vi /etc/ssh/sshd_config
+  PasswordAuthentication no -> PasswordAuthentication yes 수정후 저장
+  $ sudo systemctl restart ssh
+  ```
+
+* 계정 비밀번호설정
+
+  ```sh
+  $ sudo -i
+  $ passwd "계정이름"
+  ```
+
+  
+
+---
+
+**PC1**
+
+* PC2, PC3, PC4, PC5 instance에 **channel-artifacts**, **crypto-config** 디렉토리 같은경로에 복사
+
+  ```sh
+  $ scp -rq crypto-config/ channel-artifacts/ "계정이름"@"PC2호스트이름":/home/"계정이름"/go/Multi-Host-Fabric-Network/
+  $ scp -rq crypto-config/ channel-artifacts/ "계정이름"@"PC3호스트이름":/home/"계정이름"/go/Multi-Host-Fabric-Network/
+  $ scp -rq crypto-config/ channel-artifacts/ "계정이름"@"PC4호스트이름":/home/"계정이름"/go/Multi-Host-Fabric-Network/
+  $ scp -rq crypto-config/ channel-artifacts/ "계정이름"@"PC5호스트이름":/home/"계정이름"/go/Multi-Host-Fabric-Network/
+  ```
+
+  
+
+## 네트워크 시작 (docker swarm, docker stack)
+
+**PC1**
+
+* Initialize swarm
+
+  ```sh
+  $ docker swarm init
+  ```
+
+* 아래의 명령서 사용하여 PC2, PC3, PC4, PC5 swarm manage 등록
+
+  ```sh
+  $ docker swarm join-token manager
+  ```
+
+  명령어 사용후 나오는 아래와 같은 명령어 복사 후 PC2, PC3, PC4, PC5에 사용
+
+  ```sh
+  docker swarm join --token SWMTKN-1-23gxamkyfenf7ky3nl4f9if5ovmkmyh4jk5fepmhlseujpra65-06qfy2exlfc4m62frhgn3h55s 10.146.0.16:2377
+  ```
+
+* fabric 이름으로 overlay network 생성
+
+  ```sh
+  $ docker network create --attachable --driver overlay fabric
+  ```
+
+---
+
+**PC1, PC2, PC3, PC4, PC5**
+
+* yaml파일의 hostname 수정
+
+  ```sh
+  $ vi change_hostname.sh
+  ```
+
+  10번째줄에 docker-compose-pc.yaml 부분을 각 PC Number에 맞추어 수정후 아래의 명령어 사용하여 hostname 변경 ex) docker-compose-pc.yaml -> docker-compose-pc1.yaml
+
+  ```sh
+  $ ./change_hostname.sh
+  ```
+
+* fabric이름의 stack 으로 각 PC 에서 docker-compose-pc파일 deploy
+
+  * PC1
+
+    ```sh
+    $ docker stack deploy -c docker-compose-pc1.yaml
+    ```
+
+  * PC2
+
+    ```sh
+    $ docker stack deploy -c docker-compose-pc2.yaml
+    ```
+
+  * PC3
+
+    ```sh
+    $ docker stack deploy -c docker-compose-pc3.yaml
+    ```
+
+  * PC4
+
+    ```sh
+    $ docker stack deploy -c docker-compose-pc4.yaml
+    ```
+
+  * PC5
+
+    ```sh
+    $ docker stack deploy -c docker-compose-pc5.yaml
+    ```
+
+* 아래 명령어로 docker stack service 확인
+
+  ```sh
+  docker service ls
+  ```
+
+  

@@ -35,7 +35,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc4
+                    - node.hostname == NAMEOFHOST
                     
   ca1:
     image: hyperledger/fabric-ca
@@ -58,7 +58,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc4
+                    - node.hostname == NAMEOFHOST
 
     ports:
      - published: 7054
@@ -112,7 +112,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc4
+                    - node.hostname == NAMEOFHOST
 
     ports:
       - 7051:7051
@@ -167,7 +167,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc4
+                    - node.hostname == NAMEOFHOST
 
     ports:
       - 8051:7051
@@ -199,7 +199,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc4
+                    - node.hostname == NAMEOFHOST
   couchdb1:
     container_name: couchdb1
     image: hyperledger/fabric-couchdb
@@ -222,7 +222,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc4
+                    - node.hostname == NAMEOFHOST
 
   org1cli:
     container_name: org1cli
@@ -236,7 +236,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc4
+                    - node.hostname == NAMEOFHOST
 
     environment:
       - GOPATH=/opt/gopath

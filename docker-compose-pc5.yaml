@@ -27,7 +27,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc5
+                    - node.hostname == NAMEOFHOST
 
     ports:
      - published: 7054
@@ -81,7 +81,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc5
+                    - node.hostname == NAMEOFHOST
 
     ports:
       - 9051:7051
@@ -136,7 +136,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc5
+                    - node.hostname == NAMEOFHOST
 
     ports:
       - 10051:7051
@@ -168,7 +168,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc5
+                    - node.hostname == NAMEOFHOST
   couchdb3:
     container_name: couchdb3
     image: hyperledger/fabric-couchdb
@@ -191,7 +191,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc5
+                    - node.hostname == NAMEOFHOST
 
   org2cli:
     container_name: org2cli
@@ -205,7 +205,7 @@ services:
               condition: on-failure
             placement:
                 constraints:
-                    - node.hostname == pc5
+                    - node.hostname == NAMEOFHOST
 
     environment:
       - GOPATH=/opt/gopath
