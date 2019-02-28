@@ -197,12 +197,6 @@ $ python --version
   $ ./configtxgen.sh
   ```
 
-* ca1,ca2의 환경변수에 Private Key 삽입
-
-  ```sh
-  $ ./replacekey.sh
-  ```
-
 ---
 
 **PC2, PC3, PC4, PC5**
@@ -237,8 +231,6 @@ $ python --version
   $ passwd "계정이름"
   ```
 
-  
-
 ---
 
 **PC1**
@@ -250,6 +242,16 @@ $ python --version
   $ scp -rq crypto-config/ channel-artifacts/ "계정이름"@"PC3호스트이름":/home/"계정이름"/go/Multi-Host-Fabric-Network/
   $ scp -rq crypto-config/ channel-artifacts/ "계정이름"@"PC4호스트이름":/home/"계정이름"/go/Multi-Host-Fabric-Network/
   $ scp -rq crypto-config/ channel-artifacts/ "계정이름"@"PC5호스트이름":/home/"계정이름"/go/Multi-Host-Fabric-Network/
+  ```
+
+---
+
+**PC4, PC5**
+
+* ca1,ca2의 환경변수에 Private Key 삽입
+
+  ```sh
+  $ ./replacekey.sh
   ```
 
   
@@ -274,6 +276,12 @@ $ python --version
 
   ```sh
   docker swarm join --token SWMTKN-1-23gxamkyfenf7ky3nl4f9if5ovmkmyh4jk5fepmhlseujpra65-06qfy2exlfc4m62frhgn3h55s 10.146.0.16:2377
+  ```
+
+  아래의 명령어로 잘추가가 되었나 swarm node 확인
+
+  ```sh
+  $ docker node ls
   ```
 
 * fabric 이름으로 overlay network 생성
@@ -303,31 +311,31 @@ $ python --version
   * PC1
 
     ```sh
-    $ docker stack deploy -c docker-compose-pc1.yaml
+    $ docker stack deploy -c docker-compose-pc1.yaml fabric
     ```
 
   * PC2
 
     ```sh
-    $ docker stack deploy -c docker-compose-pc2.yaml
+    $ docker stack deploy -c docker-compose-pc2.yaml fabric
     ```
 
   * PC3
 
     ```sh
-    $ docker stack deploy -c docker-compose-pc3.yaml
+    $ docker stack deploy -c docker-compose-pc3.yaml fabric
     ```
 
   * PC4
 
     ```sh
-    $ docker stack deploy -c docker-compose-pc4.yaml
+    $ docker stack deploy -c docker-compose-pc4.yaml fabric
     ```
 
   * PC5
 
     ```sh
-    $ docker stack deploy -c docker-compose-pc5.yaml
+    $ docker stack deploy -c docker-compose-pc5.yaml fabric
     ```
 
 * 아래 명령어로 docker stack service 확인
