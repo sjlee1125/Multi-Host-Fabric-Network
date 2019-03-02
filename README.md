@@ -344,4 +344,110 @@ $ python --version
   docker service ls
   ```
 
-  
+  ![ss](./image/docker_service.png)
+
+   위와같이 확인되면 성공
+
+---
+
+**PC4 (org1cli)**
+
+* org1cli를 가지고 있는 PC4에서 수행, org1cli docker container에 접속
+
+  ```sh
+  $ docker exec -it <docker cli name> bash
+  ```
+
+  ex) $ docker exec -it fabric_org1cli.1.ft35iw2ltv2gf08j0d4zcsi34 bash
+
+  성공시 아래와같은 command line
+
+  ```sh
+  root@91eceaddee91:/opt/gopath/src/github.com/hyperledger/fabric/peer#
+  ```
+
+* Join Channel, Update Anchor Peer, Install Chaincode, Instantiate Chaincode는 Peer를 돌아가면서 해야하기때문에 인증서를 계속 바꾸어주어야한다. 
+
+  * Org1 - Peer0
+
+    ```sh
+    CORE_PEER_LOCALMSPID="Org1MSP"  CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+    CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    CORE_PEER_ADDRESS=peer0.org1.example.com:7051  
+    ```
+
+  * Org1 - Peer1
+
+    ```sh
+    CORE_PEER_LOCALMSPID="Org1MSP"  CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+    CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    CORE_PEER_ADDRESS=peer1.org1.example.com:7051
+    ```
+
+  * Org2 - Peer0
+
+    ```sh
+    CORE_PEER_LOCALMSPID="Org2MSP"  CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+    CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+    CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+    ```
+
+  * Org2 - Peer1
+
+    ```sh
+    CORE_PEER_LOCALMSPID="Org2MSP"  CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+    CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+    CORE_PEER_ADDRESS=peer1.org2.example.com:7051
+    ```
+
+* Create & Join Channel
+
+  ```sh
+  change Org1-Peer0
+  $ peer channel create -o orderer0.example.com:7050 -c mychannel -f ./channel-artifacts/channel.tx
+  $ peer channel join -b mychannel.block
+  change Org1-Peer1
+  $ peer channel join -b mychannel.block
+  change Org2-Peer0
+  $ peer channel join -b mychannel.block
+  change Org2-Peer1
+  $ peer channel join -b mychannel.block
+  ```
+
+* Update Anchor Peer
+
+  ```sh
+  change Org1-Peer0
+  $ peer channel update -o orderer0.example.com:7050 -c mychannel -f ./channel-artifacts/Org1MSPanchors.tx
+  change Org2-Peer0
+  $ peer channel update -o orderer0.example.com:7050 -c mychannel -f ./channel-artifacts/Org2MSPanchors.tx
+  ```
+
+* Install Chaincode
+
+  ```sh
+  change Org1-Peer0
+  $ peer chaincode install -n mycc -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+  change Org1-Peer1
+  $ peer chaincode install -n mycc -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+  change Org2-Peer0
+  $ peer chaincode install -n mycc -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+  change Org2-Peer1
+  $ peer chaincode install -n mycc -v 1.0 -p github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+  ```
+
+* Instantiate Chaincode - instantiate 명령어는 chaincode가 installed된 Peer중 한곳에서만 사용
+
+  아래의 명령어 사용후 instantiated된 chaincode image가 만들어지기때문에 소량의 시간 소모
+
+  ```sh
+  $ peer chaincode instantiate -o orderer0.example.com:7050 -C mychannel -n mycc -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
+  ```
+
+* Query Chaincode
+
+  ```sh
+  peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
+  ```
+
+  100 출력하면 성공
